@@ -9,7 +9,7 @@ export default defineConfig({
     federation({
       name: 'host',
       remotes: {
-        remote: 'remote@https://konychev-aleksei.github.io/ubiquitous-giggle/remote/assets/remoteEntry.js'
+        remote: 'https://konychev-aleksei.github.io/ubiquitous-giggle/remote/assets/remoteEntry.js'
       },
       shared: ['react', 'react-dom']
     })
