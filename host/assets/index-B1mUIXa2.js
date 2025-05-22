@@ -16306,7 +16306,7 @@ function requireClient () {
 var clientExports = requireClient();
 
 const remotesMap = {
-'remote':{url:'remote@https://konychev-aleksei.github.io/ubiquitous-giggle/remote/assets/remoteEntry.js',format:'esm',from:'vite'}
+'remote':{url:'https://konychev-aleksei.github.io/ubiquitous-giggle/remote/assets/remoteEntry.js',format:'esm',from:'vite'}
 };
                 const currentImports = {};
 
