@@ -4,9 +4,6 @@ import federation from '@originjs/vite-plugin-federation'
 
 export default defineConfig({
   base: '/ubiquitous-giggle/remote/',
-  build: {
-    outDir: 'dist', // относительно apps/remote/
-  },
   plugins: [
     react(),
     federation({
@@ -19,6 +16,7 @@ export default defineConfig({
     })
   ],
   build: {
+    outDir: 'dist',
     target: 'esnext',
     minify: false,
     cssCodeSplit: false
