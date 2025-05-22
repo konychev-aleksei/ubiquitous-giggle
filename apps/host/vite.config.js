@@ -3,13 +3,13 @@ import react from '@vitejs/plugin-react'
 import federation from '@originjs/vite-plugin-federation'
 
 export default defineConfig({
-  base: '/host/',
+  base: '/ubiquitous-giggle/host/',
   plugins: [
     react(),
     federation({
       name: 'host',
       remotes: {
-        remote: 'http://localhost:4173/assets/remoteEntry.js'
+        remote: 'remote@https://konychev-aleksei.github.io/ubiquitous-giggle/remote/assets/remoteEntry.js'
       },
       shared: ['react', 'react-dom']
     })

@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import federation from '@originjs/vite-plugin-federation'
 
 export default defineConfig({
-  base: '/remote/',
+  base: '/ubiquitous-giggle/remote/',
   plugins: [
     react(),
     federation({
