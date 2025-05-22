@@ -11,26 +11,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Node.js
+      - name: Setup Node.js and cache with pnpm
         uses: actions/setup-node@v3
         with:
           node-version: 18
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Install pnpm globally
         run: npm install -g pnpm
 
-      - name: Check pnpm version
-        run: pnpm --version
-
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build Host App
-        run: pnpm --filter host run build
-
       - name: Build Remote App
         run: pnpm --filter remote run build
+
+      - name: Build Host App
+        run: pnpm --filter host run build
