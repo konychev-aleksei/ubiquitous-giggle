@@ -28,11 +28,19 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build Remote App
-        run: pnpm --filter remote run build
+      - name: Build host
+        working-directory: ./apps/host
+        run: pnpm install && pnpm build
 
-      - name: Build Host App
-        run: pnpm --filter host run build
+      - name: Build remote
+        working-directory: ./apps/remote
+        run: pnpm install && pnpm build
+
+      - name: Prepare deployment
+        run: |
+          mkdir -p dist
+          cp -r apps/host/dist dist/host
+          cp -r apps/remote/dist dist/remote
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
