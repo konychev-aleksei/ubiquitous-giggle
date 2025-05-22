@@ -14,16 +14,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Node.js
+      - name: Setup Node.js with Corepack
         uses: actions/setup-node@v3
         with:
           node-version: 18
           cache: 'pnpm'
 
-      - name: Install pnpm
+      - name: Enable and install pnpm
         run: |
           corepack enable
-          corepack prepare pnpm@latest --activate
+          corepack prepare pnpm@8.15.6 --activate # можно заменить на твою версию
+
+      - name: Verify pnpm installed
+        run: pnpm --version
 
       - name: Install dependencies
         run: pnpm install
