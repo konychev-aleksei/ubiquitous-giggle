@@ -20,9 +20,7 @@ jobs:
           node-version: 18
 
       - name: Install pnpm globally via npm
-        run: |
-          npm install -g pnpm
-          echo "::add-path::$(npm bin -g)"
+        run: npm install -g pnpm
 
       - name: Check pnpm version
         run: pnpm --version
