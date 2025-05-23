@@ -1,15 +1,14 @@
-name: Build Vite Microfrontends
+name: Build, Test and Deploy Vite Microfrontends
 
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
 
 jobs:
-  build:
+  test-host:
     runs-on: ubuntu-latest
-
+    outputs:
+      host-built: ${{ steps.build-host.outcome == 'success' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -19,32 +18,78 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install pnpm globally via npm
+      - name: Install pnpm globally
         run: npm install -g pnpm
-
-      - name: Check pnpm version
-        run: pnpm --version
 
       - name: Install dependencies
         run: pnpm install
 
       - name: Build host
+        id: build-host
         working-directory: ./apps/host
-        run: pnpm install && pnpm build
+        run: |
+          pnpm install
+          pnpm run test
+          pnpm run build
+
+  test-remote:
+    runs-on: ubuntu-latest
+    outputs:
+      remote-built: ${{ steps.build-remote.outcome == 'success' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install pnpm globally
+        run: npm install -g pnpm
+
+      - name: Install dependencies
+        run: pnpm install
 
       - name: Build remote
+        id: build-remote
         working-directory: ./apps/remote
-        run: pnpm install && pnpm build
+        run: |
+          pnpm install
+          pnpm run test
+          pnpm run build
 
-      - name: Prepare deployment
+  deploy:
+    needs: [test-host, test-remote]
+    runs-on: ubuntu-latest
+    if: needs.test-host.result == 'success' || needs.test-remote.result == 'success'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install pnpm globally
+        run: npm install -g pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Prepare deployment folders
         run: |
           mkdir -p dist
-          cp -r apps/host/dist dist/host
-          cp -r apps/remote/dist dist/remote
+          if [ "${{ needs.test-host.result }}" == "success" ]; then
+            cp -r apps/host/dist dist/host
+          fi
+          if [ "${{ needs.test-remote.result }}" == "success" ]; then
+            cp -r apps/remote/dist dist/remote
+          fi
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
-
