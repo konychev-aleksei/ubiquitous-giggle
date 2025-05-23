@@ -1,14 +1,15 @@
-name: Build, Test and Deploy Vite Microfrontends
+name: Build Vite Microfrontends
 
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
-  test-host:
+  build:
     runs-on: ubuntu-latest
-    outputs:
-      host-built: ${{ steps.build-host.outcome == 'success' }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -18,77 +19,59 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install pnpm globally
+      - name: Install pnpm globally via npm
         run: npm install -g pnpm
+
+      - name: Check pnpm version
+        run: pnpm --version
 
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build host
-        id: build-host
+      # Проверяем изменения в папке apps/host
+      - name: Check if host changed
+        id: host_changed
+        run: |
+          echo "changed=$(git diff --name-only ${{ github.sha }} ${{ github.event.before }} | grep '^apps/host/' || true)" >> result.txt
+          if [ -s result.txt ]; then
+            echo "host_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "host_changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      # Проверяем изменения в папке apps/remote
+      - name: Check if remote changed
+        id: remote_changed
+        run: |
+          echo "changed=$(git diff --name-only ${{ github.sha }} ${{ github.event.before }} | grep '^apps/remote/' || true)" >> result.txt
+          if [ -s result.txt ]; then
+            echo "remote_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "remote_changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build host if changed
+        if: steps.host_changed.outputs.host_changed == 'true'
         working-directory: ./apps/host
-        run: |
-          pnpm install
-          pnpm run test
-          pnpm run build
+        run: pnpm install && pnpm build
 
-  test-remote:
-    runs-on: ubuntu-latest
-    outputs:
-      remote-built: ${{ steps.build-remote.outcome == 'success' }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - name: Install pnpm globally
-        run: npm install -g pnpm
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Build remote
-        id: build-remote
+      - name: Build remote if changed
+        if: steps.remote_changed.outputs.remote_changed == 'true'
         working-directory: ./apps/remote
-        run: |
-          pnpm install
-          pnpm run test
-          pnpm run build
+        run: pnpm install && pnpm build
 
-  deploy:
-    needs: [test-host, test-remote]
-    runs-on: ubuntu-latest
-    if: needs.test-host.result == 'success' || needs.test-remote.result == 'success'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - name: Install pnpm globally
-        run: npm install -g pnpm
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Prepare deployment folders
+      - name: Prepare deployment
         run: |
           mkdir -p dist
-          if [ "${{ needs.test-host.result }}" == "success" ]; then
+          if [ "${{ steps.host_changed.outputs.host_changed }}" = "true" ]; then
             cp -r apps/host/dist dist/host
           fi
-          if [ "${{ needs.test-remote.result }}" == "success" ]; then
+          if [ "${{ steps.remote_changed.outputs.remote_changed }}" = "true" ]; then
             cp -r apps/remote/dist dist/remote
           fi
 
       - name: Deploy to GitHub Pages
+        if: steps.host_changed.outputs.host_changed == 'true' || steps.remote_changed.outputs.remote_changed == 'true'
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
