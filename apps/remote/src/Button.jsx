@@ -1,4 +1,4 @@
 export default function Button() {
-  return <button>Remote Button</button>
+  return <button>ARemote Button</button>
 }
   
