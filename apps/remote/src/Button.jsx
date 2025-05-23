@@ -1,4 +1,4 @@
 export default function Button() {
-  return <button>ARemote Button</button>
+  return <button>Yoptaa!!! ARemote Button</button>
 }
   
