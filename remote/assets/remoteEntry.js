@@ -3,7 +3,7 @@ const currentImports = {};
       let moduleMap = {
 "./Button":()=>{
       dynamicLoadingCss([], false, './Button');
-      return __federation_import('/ubiquitous-giggle/remote/assets/__federation_expose_Button-B4mQu9RS.js').then(module =>Object.keys(module).every(item => exportSet.has(item)) ? () => module.default : () => module)},};
+      return __federation_import('/ubiquitous-giggle/remote/assets/__federation_expose_Button-1Qj-9fKr.js').then(module =>Object.keys(module).every(item => exportSet.has(item)) ? () => module.default : () => module)},};
       const seen = {};
       const dynamicLoadingCss = (cssFilePaths, dontAppendStylesToHead, exposeItemName) => {
         const metaUrl = import.meta.url;
